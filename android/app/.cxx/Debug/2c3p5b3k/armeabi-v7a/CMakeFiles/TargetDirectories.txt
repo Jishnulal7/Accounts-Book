@@ -1,0 +1,2 @@
+D:/Jishnu/Projects/Accounts Book/android/app/.cxx/Debug/2c3p5b3k/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/Jishnu/Projects/Accounts Book/android/app/.cxx/Debug/2c3p5b3k/armeabi-v7a/CMakeFiles/rebuild_cache.dir

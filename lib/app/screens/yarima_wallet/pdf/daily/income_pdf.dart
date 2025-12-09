@@ -1,0 +1,115 @@
+import 'dart:io';
+import 'package:account_book/app/data/model/transaction_model.dart';
+import 'package:file_saver/file_saver.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
+
+class DailyReceiptPDF {
+  final DateTime selectedDate;
+  final Box<TransactionModel> transactionBox;
+
+  DailyReceiptPDF({
+    required this.selectedDate,
+    required this.transactionBox,
+  });
+
+  Future<String> generateReceiptPdfReport() async {
+    // Filter Receipt transactions for the selected date
+    final filteredTransactions = transactionBox.values.where((transaction) {
+      return transaction.date.year == selectedDate.year &&
+          transaction.date.month == selectedDate.month &&
+          transaction.date.day == selectedDate.day &&
+          transaction.transactionType == TransactionType.receipt;
+    }).toList();
+
+    final PdfDocument document = PdfDocument();
+    final PdfPage page = document.pages.add();
+
+    // Add title to the page
+    page.graphics.drawString(
+      'Daily Receipt Report - ${DateFormat('dd MMMM yyyy').format(selectedDate)}',
+      PdfStandardFont(PdfFontFamily.helvetica, 20),
+      brush: PdfSolidBrush(PdfColor(0, 0, 0)),
+      bounds: Rect.fromLTWH(0, 0, page.getClientSize().width, 50),
+      format: PdfStringFormat(
+        alignment: PdfTextAlignment.center,
+        lineAlignment: PdfVerticalAlignment.middle,
+      ),
+    );
+
+    final PdfGrid grid = PdfGrid();
+    grid.columns.add(count: 5);
+    grid.headers.add(1);
+
+    PdfGridRow header = grid.headers[0];
+    header.cells[0].value = 'Time';
+    header.cells[1].value = 'Description';
+    header.cells[2].value = 'Category';
+    header.cells[3].value = 'Sub-Category';
+    header.cells[4].value = 'Amount';
+
+    header.style.backgroundBrush = PdfSolidBrush(PdfColor(0, 255, 0));
+    header.style.textBrush = PdfBrushes.black;
+    header.style.font =
+        PdfStandardFont(PdfFontFamily.helvetica, 10, style: PdfFontStyle.bold);
+
+    double totalReceipt = 0;
+
+    for (var transaction in filteredTransactions) {
+      PdfGridRow row = grid.rows.add();
+      row.cells[0].value = DateFormat('HH:mm').format(transaction.date);
+      row.cells[1].value = transaction.description;
+      row.cells[2].value = transaction.categoryName ?? '';
+      row.cells[3].value =
+          transaction.subCategory ?? transaction.generalSubCategory ?? '';
+      row.cells[4].value = transaction.amount.toStringAsFixed(1);
+
+      totalReceipt += transaction.amount;
+    }
+
+    // Add total row
+    PdfGridRow totalRow = grid.rows.add();
+    totalRow.cells[2].value = 'Total Receipt';
+    totalRow.cells[4].value = totalReceipt.toStringAsFixed(1);
+
+    PdfGridCellStyle totalStyle = PdfGridCellStyle();
+    totalStyle.backgroundBrush = PdfSolidBrush(PdfColor(200, 255, 200));
+    totalStyle.font =
+        PdfStandardFont(PdfFontFamily.helvetica, 10, style: PdfFontStyle.bold);
+    totalRow.cells[2].style = totalStyle;
+    totalRow.cells[4].style = totalStyle;
+
+    grid.style.cellPadding = PdfPaddings(left: 5, right: 5, top: 3, bottom: 3);
+
+    grid.draw(
+      page: page,
+      bounds: Rect.fromLTWH(
+          0, 50, page.getClientSize().width, page.getClientSize().height - 50),
+    );
+
+    List<int> bytes = await document.save();
+    Uint8List uint8List = Uint8List.fromList(bytes);
+
+    final fileName =
+        'Daily_Receipt_Report_${DateFormat('dd_MM_yyyy').format(selectedDate)}.pdf';
+    if (kIsWeb) {
+      // Web platform: Use HTML download
+      return FileSaver.instance.saveFile(
+        name: fileName,
+        bytes: uint8List,
+        ext: 'pdf',
+        mimeType: MimeType.pdf,
+      );
+    } else {
+      // Mobile/Desktop platforms
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/$fileName');
+      await file.writeAsBytes(bytes);
+      return file.path;
+    }
+  }
+}

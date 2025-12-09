@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "115539380125",
+    "project_id": "account-book-d3db6",
+    "storage_bucket": "account-book-d3db6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:115539380125:android:fae394f2001b818cfc9174",
+        "android_client_info": {
+          "package_name": "com.yarima.accountbook"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTNnhlYW3klJxbIIc2H6Y0eJKRi6ACNPo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

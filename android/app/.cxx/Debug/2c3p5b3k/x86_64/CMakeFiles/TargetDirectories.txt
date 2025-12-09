@@ -1,0 +1,2 @@
+D:/Jishnu/Projects/Accounts Book/android/app/.cxx/Debug/2c3p5b3k/x86_64/CMakeFiles/edit_cache.dir
+D:/Jishnu/Projects/Accounts Book/android/app/.cxx/Debug/2c3p5b3k/x86_64/CMakeFiles/rebuild_cache.dir
